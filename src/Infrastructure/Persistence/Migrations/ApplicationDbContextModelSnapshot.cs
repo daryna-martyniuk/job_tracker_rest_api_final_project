@@ -22,6 +22,65 @@ namespace Infrastructure.Persistence.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("Domain.Applications.JobApplication", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateOnly>("AppliedAt")
+                        .HasColumnType("date")
+                        .HasColumnName("applied_at");
+
+                    b.Property<Guid>("CompanyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("company_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("timezone('utc', now())");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("Varchar(500)")
+                        .HasColumnName("description");
+
+                    b.Property<string>("EmploymentType")
+                        .HasColumnType("varchar(32)")
+                        .HasColumnName("employment_type");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("Varchar(32)")
+                        .HasColumnName("status");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("Varchar(255)")
+                        .HasColumnName("title");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("WorkFormat")
+                        .HasColumnType("varchar(32)")
+                        .HasColumnName("work_format");
+
+                    b.HasKey("Id")
+                        .HasName("pk_job_applications");
+
+                    b.HasIndex("CompanyId")
+                        .HasDatabaseName("ix_job_applications_company_id");
+
+                    b.HasIndex("Title")
+                        .IsUnique()
+                        .HasDatabaseName("ix_job_applications_title");
+
+                    b.ToTable("job_applications", (string)null);
+                });
+
             modelBuilder.Entity("Domain.Companies.Company", b =>
                 {
                     b.Property<Guid>("Id")
@@ -86,6 +145,62 @@ namespace Infrastructure.Persistence.Migrations
                         .HasDatabaseName("ix_skills_name");
 
                     b.ToTable("skills", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.Applications.JobApplication", b =>
+                {
+                    b.HasOne("Domain.Companies.Company", "Company")
+                        .WithMany()
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_job_applications_companies_company_id");
+
+                    b.OwnsOne("Domain.Applications.ApplicationAttributes", "Attributes", b1 =>
+                        {
+                            b1.Property<Guid>("JobApplicationId");
+
+                            b1.Property<int?>("Currency")
+                                .HasJsonPropertyName("currency");
+
+                            b1.Property<string>("Location")
+                                .HasJsonPropertyName("location");
+
+                            b1.Property<int?>("Priority")
+                                .HasJsonPropertyName("priority");
+
+                            b1.Property<DateOnly?>("ResponseDeadline")
+                                .HasJsonPropertyName("response_deadline");
+
+                            b1.Property<int?>("SalaryMax")
+                                .HasJsonPropertyName("salary_max");
+
+                            b1.Property<int?>("SalaryMin")
+                                .HasJsonPropertyName("salary_min");
+
+                            b1.Property<string>("Source")
+                                .HasJsonPropertyName("source");
+
+                            b1.Property<string>("VacancyUrl")
+                                .HasJsonPropertyName("vacancy_url");
+
+                            b1.HasKey("JobApplicationId");
+
+                            b1.ToTable("job_applications");
+
+                            b1
+                                .ToJson("attributes")
+                                .HasColumnType("jsonb");
+
+                            b1.WithOwner()
+                                .HasForeignKey("JobApplicationId")
+                                .HasConstraintName("fk_job_applications_job_applications_id");
+                        });
+
+                    b.Navigation("Attributes")
+                        .IsRequired();
+
+                    b.Navigation("Company");
                 });
 #pragma warning restore 612, 618
         }

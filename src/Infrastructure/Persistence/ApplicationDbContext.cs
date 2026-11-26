@@ -1,4 +1,5 @@
 ﻿using System;
+using Domain.Applications;
 using Domain.Companies;
 using Domain.Skills;
 using Infrastructure.Persistence.Converters;
@@ -10,6 +11,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 {
     public DbSet<Company> Companies => Set<Company>();
     public DbSet<Skill> Skills => Set<Skill>();
+    public DbSet<JobApplication> JobApplications => Set<JobApplication>();
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
